@@ -12,8 +12,75 @@
 			<script src="./scripts/usb2snes.js"></script>
 			<script src="./scripts/network.js"></script>
 			<script src="./scripts/tracking_interface.js"></script>
+			<script src="./scripts/speech.js"></script>
 
 			<script type="text/javascript">
+      let si = new SpeechTracker();
+			let slot_speech_map = [
+				{ slot: KeyItemCheck.ADAMANT,
+					words: ["adamant cave","adamant","rat tail"] },
+				{ slot:  KeyItemCheck.ANTLION,
+					words: ["antlion cave","antlion"] },
+				{ slot:  KeyItemCheck.BARON_KING,
+					words: ["baron king","baron castle","baron"] },
+				{ slot:  KeyItemCheck.BARON_INN,
+					words: ["baron inn","inn"] },
+				{ slot:  KeyItemCheck.BARON_ODIN,
+					words: ["odin","baron basement","basement"] },
+				{ slot:  KeyItemCheck.FABUL_DEFEND,
+			  	words: ["fabul","defense","defend","monk","monks"] },
+				{ slot:  KeyItemCheck.FABUL_SYLPH,
+					words: ["sheila","sheila one"] },
+				{ slot:  KeyItemCheck.FABUL_PAN,
+					words: ["sheila two","pan"] },
+				{ slot:  KeyItemCheck.MAGNES,
+					words: ["magnet","harp"] },
+				{ slot: KeyItemCheck.MIST,
+					words: ["mist","mom","derrick"] },
+				{ slot: KeyItemCheck.MT_ORDEALS,
+					words: ["mount ordeals","ordeals"] },
+				{ slot: KeyItemCheck.TOROIA,
+					words: ["toroia castle","toroia","edward","bed","bedward", "freebie"] },
+				{ slot: KeyItemCheck.TOWER_ZOT,
+					words: ["tower of zot","tower","zot"] },
+				{ slot: KeyItemCheck.DWARF,
+					words: ["dwarf castle","dwarf"] },
+				{ slot: KeyItemCheck.FEY_CHEST,
+					words: ["feymarch"] },
+				{ slot: KeyItemCheck.FEY_ASURA,
+					words: ["asura","monster queen","queen"] },
+				{ slot: KeyItemCheck.FEY_LEVIATHAN,
+					words: ["leviathan","tan","monster king", "king"] },
+				{ slot: KeyItemCheck.LOWER_BABIL_BOSS,
+					words: ["babil", "babble", "babel"] },
+				{ slot: KeyItemCheck.LOWER_BABIL_CANNON,
+					words: ["super cannon","cannon"] },
+				{ slot: KeyItemCheck.SEALED_CAVE,
+					words: ["sealed cave","luca cave", "sealed"] },
+				{ slot: KeyItemCheck.SYLPH_CAVE,
+					words: ["sylph cave","sylph","sylphs"] },
+				{ slot: KeyItemCheck.BAHAMUT,
+					words: ["cave bahamut","cave value","bahamut","ham"] },
+				{ slot: KeyItemCheck.MOON_CRYSTAL,
+					words: ["crystal sword", "crystal", "wyvern"] },
+				{ slot: KeyItemCheck.MOON_MASAMUNE,
+					words: ["masamune", "masa", "noodle"] },
+				{ slot: KeyItemCheck.MOON_MURASAME,
+					words: ["muramasa", "mura", "pale dim","pale"] },
+				{ slot: KeyItemCheck.MOON_RIBBON,
+					words: ["ribbon"] },
+				{ slot: KeyItemCheck.MOON_WHITE,
+					words: ["white spear"] }
+			]
+
+			si.markSlot = function(index) {
+				_set_loc(slot_speech_map[index].slot, true)
+			}
+
+			si.getSlotMapping = function() {
+				return slot_speech_map;
+			}
+
 			let ti = new tracking_interface();
 			let ki_map = {
 				0x00: KeyItem.PACKAGE,
@@ -59,8 +126,8 @@
 				0x0034: KeyItemCheck.SYLPH_CAVE,
 				0x0035: KeyItemCheck.BAHAMUT,
 				0x0037: KeyItemCheck.MOON_CRYSTAL,
-				0x0036: KeyItemCheck.MOON_MASAMUNE,
-				0x003B: KeyItemCheck.MOON_MURASAME,
+				0x003B: KeyItemCheck.MOON_MASAMUNE,
+				0x0036: KeyItemCheck.MOON_MURASAME,
 				0x0039: KeyItemCheck.MOON_RIBBON,
 				0x003A: KeyItemCheck.MOON_RIBBON,
 				0x0038: KeyItemCheck.MOON_WHITE
@@ -79,22 +146,25 @@
 			// Define this function to set KI locations, slot is the docced index at
 			// http://wiki.ff4fe.com/doku.php?id=developer_integration
 			// value is true or false
+			function _set_loc(actualslot, value) {
+					if (keyitemlocations[actualslot] !== 0 &&
+						keyitemlocations[actualslot] !== 3) {
+							if (value)
+							  keyitemlocations[actualslot] = 2;
+							else
+								keyitemlocations[actualslot] = 1;
+					}
+			}
 			ti.auto_set_loc_ki = (slot, value) => {
 			  if (ki_location_map[slot] !== undefined) {
-					if (keyitemlocations[ki_location_map[slot]] !== 0 &&
-						keyitemlocations[ki_location_map[slot]] !== 3) {
-							if (value)
-							  keyitemlocations[ki_location_map[slot]] = 2;
-							else
-								keyitemlocations[ki_location_map[slot]] = 1;
-						}
-					}
-					else {
-
-					}
+					_set_loc(ki_location_map[slot], value);
 				}
+				else {
+			  }
+			}
 			// Set the state update function here if you have one
 			ti.auto_update_func = ApplyChecks;
+			si.auto_update_func = ApplyChecks;
 
 			$(document).ready(function(){
 				SetModes();
@@ -103,7 +173,14 @@
 				if (enableautotracking == '1') {
 					ti.getConnected();
 				}
-				
+				if (true) {
+					if (navigator.userAgent.indexOf("Chrome") > -1) {
+						window.SpeechRecognition = window.webkitSpeechRecognition;
+						window.SpeechGrammarList = window.webkitSpeechGrammarList;
+					}
+					si.connect(window);
+				}
+
 			});
 			</script>
 			<script async src="https://www.googletagmanager.com/gtag/js?id=UA-121466364-1"></script>
